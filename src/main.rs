@@ -59,7 +59,7 @@ fn main() {
                     }
                     "2" => {
                         println!("Escolha a tarefa a ser iniciada, pelo índice:");
-                        lista_de_tarefas.listar_tarefas();
+                        lista_de_tarefas.listar_tarefas(Option::from(Estado::NaoIniciada), None);
                         match tratar_input_int() {
                             Ok(indice) => {
                                 lista_de_tarefas.iniciar_tarefa(indice -1);
@@ -71,7 +71,7 @@ fn main() {
                     }
                     "3" => {
                         println!("Escolha a tarefa a ser marcada como concluída, pelo índice:");
-                        lista_de_tarefas.listar_tarefas();
+                        lista_de_tarefas.listar_tarefas(Option::from(Estado::NaoIniciada),Option::from(Estado::EmAndamento));
                         match tratar_input_int() {
                             Ok(indice) => {
                                 lista_de_tarefas.completar_tarefa(indice-1);
@@ -83,7 +83,7 @@ fn main() {
                     }
                     "4" => {
                         println!("Escolha a tarefa a ser removida, pelo índice:");
-                        lista_de_tarefas.listar_tarefas();
+                        lista_de_tarefas.listar_tarefas(None, None);
                         match tratar_input_int() {
                             Ok(indice) => {
                                 lista_de_tarefas.remover_tarefa(indice-1);
@@ -94,7 +94,7 @@ fn main() {
                         }
                     }
                     "5" => {
-                        lista_de_tarefas.listar_tarefas();
+                        lista_de_tarefas.listar_tarefas(None,None);
                         trigger_continue();
                     }
                     "6" => {

@@ -8,8 +8,8 @@ use std::thread;
 use std::time::Duration;
 //use crate::Estado::Concluida;
 
-#[derive(Serialize, Deserialize)]
-enum Estado {
+#[derive(Serialize, Deserialize, PartialEq)]
+pub enum Estado {
     NaoIniciada,
     EmAndamento,
     Concluida,
@@ -87,17 +87,51 @@ impl ListaDeTarefas {
         }
     }
 
-    pub fn listar_tarefas(&self) {
-        println!("Lista de Tarefas:");
-        for (indice, tarefa) in self.tarefas.iter().enumerate() {
-            let status = match tarefa.estado {
-                Estado::NaoIniciada => " (Não Iniciada)",
-                Estado::EmAndamento => " (Em Andamento)",
-                Estado::Concluida => " (Concluída)",
-            };
-            println!("{} : {}: {}{}",indice + 1,tarefa.data, tarefa.descricao, status);
+    pub fn listar_tarefas(&self, estado1: Option<Estado>, estado2: Option<Estado>) {
+        // Check if both options are None
+        if estado1.is_none() && estado2.is_none() {
+            println!("Lista de Tarefas:");
+            for (indice, tarefa) in self.tarefas.iter().enumerate() {
+                let status = match tarefa.estado {
+                    Estado::NaoIniciada => " (Não Iniciada)",
+                    Estado::EmAndamento => " (Em Andamento)",
+                    Estado::Concluida => " (Concluída)",
+                };
+                println!("{} : {}: {}{}", indice + 1, tarefa.data, tarefa.descricao, status);
+            }
+        }
+        // Check if estado1 is Some
+        if let Some(estado1) = estado1 {
+            // Check if estado2 is None
+            if estado2.is_none() {
+                for (indice, tarefa) in self.tarefas.iter().enumerate() {
+                    if tarefa.estado == estado1 {
+                        let status = match tarefa.estado {
+                            Estado::NaoIniciada => " (Não Iniciada)",
+                            Estado::EmAndamento => " (Em Andamento)",
+                            Estado::Concluida => " (Concluída)",
+                        };
+                        println!("{} : {}: {}{}", indice + 1, tarefa.data, tarefa.descricao, status);
+                    }
+                }
+            } else {
+                // Both estado1 and estado2 are Some, borrow the value of estado2
+                let estado2 = estado2.as_ref().unwrap();
+                for (indice, tarefa) in self.tarefas.iter().enumerate() {
+                    if tarefa.estado == estado1 || tarefa.estado == *estado2 {
+                        let status = match tarefa.estado {
+                            Estado::NaoIniciada => " (Não Iniciada)",
+                            Estado::EmAndamento => " (Em Andamento)",
+                            Estado::Concluida => " (Concluída)",
+                        };
+                        println!("{} : {}: {}{}", indice + 1, tarefa.data, tarefa.descricao, status);
+                    }
+                }
+            }
         }
     }
+
+
 
     pub fn salvar_em_json(&self, nome_arquivo: &str) -> io::Result<()> {
         let arquivo = File::create(nome_arquivo)?;
