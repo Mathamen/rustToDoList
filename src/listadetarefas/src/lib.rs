@@ -1,14 +1,12 @@
-use std::io::{self, Read, stdout, Write};
-use std::process::Command;
+use std::io;
 use serde::{Serialize, Deserialize};
-use std::fs::{File, OpenOptions};
-use chrono::{Utc, TimeZone, Local};
-use std::time::{SystemTime, UNIX_EPOCH};
-use std::thread;
-use std::time::Duration;
-//use crate::Estado::Concluida;
+use std::fs::File;
+use chrono::Local;
 
-#[derive(Serialize, Deserialize, PartialEq)]
+
+
+
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub enum Estado {
     NaoIniciada,
     EmAndamento,
@@ -62,10 +60,7 @@ impl ListaDeTarefas {
 
     pub fn completar_tarefa(&mut self, indice: usize) {
         if let Some(tarefa) = self.tarefas.get_mut(indice) {
-          //  if (let Estado::Concluida == tarefa.estado){
-            //    println!("Você não pode terminar uma tarefa já feita");
-            //    return
-           //}
+            // colocar aqui a lógica para travar de mudar uma não listada
 
             tarefa.estado = Estado::Concluida;
             self.salvar_em_json("tarefas.json").unwrap_or_else(|err| {
@@ -147,10 +142,8 @@ impl ListaDeTarefas {
     }
 }
 
-pub fn limpar_console() {
-    if cfg!(target_os = "windows") {
-        let _ = Command::new("cmd").args(&["/c", "cls"]).status();
-    } else {
-        let _ = Command::new("sh").arg("-c").arg("clear").status();
-    }
-}
+
+
+
+
+
