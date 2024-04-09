@@ -1,7 +1,7 @@
 use std::io;
 use serde::{Serialize, Deserialize};
 use std::fs::File;
-use chrono::Local;
+use chrono::{Datelike, Local};
 
 
 
@@ -22,8 +22,10 @@ pub struct Tarefa {
 
 impl Tarefa {
     fn new(descricao: String) -> Tarefa {
+        let full = Local::now();
+        let date = format!("{}/{}/{}", full.day(), full.month(), full.year());
         Tarefa {
-            data:  Local::today().format("%d/%m/%Y").to_string(),
+            data: date,
             descricao,
             estado: Estado::NaoIniciada,
         }

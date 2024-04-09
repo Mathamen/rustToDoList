@@ -1,6 +1,8 @@
+use std::fs::File;
 use std::io;
 use std::process::Command;
-use listadetarefas::{Estado, ListaDeTarefas};
+use listadetarefas::{Estado, ListaDeTarefas, Tarefa};
+use chrono::Local;
 
 pub fn tratar_input_string() -> Result<String, io::Error> {
     let mut string = String::new();
@@ -40,8 +42,19 @@ pub fn atribuir_entrada_enum(){
 }
 
 
+pub fn print_handler(s: &str) {
+    println!("{}", s);
+}
 
-pub fn loopPrincipal() {
+fn trim_margin(s: &str) -> String {
+    s.lines()
+        .map(|line| line.trim_start())
+        .collect::<Vec<_>>()
+        .join("\n")
+}
+
+
+pub fn loop_principal() {
     let mut lista_de_tarefas = ListaDeTarefas::new();
 
     // Carregar tarefas de um arquivo JSON, se existir
@@ -51,13 +64,16 @@ pub fn loopPrincipal() {
 
     loop {
         limpar_console();
-        println!("Escolha uma ação:");
-        println!("1. Adicionar tarefa");
-        println!("2. Iniciar tarefa");
-        println!("3. Completar tarefa");
-        println!("4. Remover tarefa");
-        println!("5. Listar tarefas");
-        println!("6. Sair");
+        let s = "
+        Escolha uma ação:
+        1. Adicionar tarefa
+        2. Iniciar tarefa
+        3. Completar tarefa
+        4. Remover tarefa
+        5. Listar tarefas
+        6. Sair ";
+        print_handler(&trim_margin(s));
+
 
         match tratar_input_string() {
             Ok(entrada) => {
@@ -158,7 +174,7 @@ pub fn loopPrincipal() {
 
 
 
-    pub fn add(left: usize, right: usize) -> usize {
+pub fn add(left: usize, right: usize) -> usize {
     left + right
 }
 
@@ -171,5 +187,11 @@ mod tests {
         let result = add(2, 2);
         assert_eq!(result, 4);
     }
+
+    #[test]
+    fn teste_continue(){
+
+    }
+
 }
 

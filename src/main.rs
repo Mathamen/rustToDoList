@@ -1,6 +1,5 @@
 use entradasaida::*;
 
-
 fn main() {
-   loopPrincipal();
+   loop_principal();
 }
