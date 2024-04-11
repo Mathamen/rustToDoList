@@ -15,17 +15,18 @@ pub fn tratar_input_string() -> Result<String, io::Error> {
     }
 }
 
-pub fn trigger_continue() {
-    let mut entrada = String::new();
-    println!("Pressione Enter para continuar...");
-    let _ = io::stdin().read_line(&mut entrada);
-}
-
 pub fn tratar_input_int() -> Result<usize, io::Error> {
     tratar_input_string()?
         .parse::<usize>()
         .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))
 }
+
+pub fn trigger_continue() {
+    let mut entrada = String::new();
+    print_handler("Pressione Enter para continuar...");
+    let _ = io::stdin().read_line(&mut entrada);
+}
+
 
 
 pub fn limpar_console() {
@@ -34,6 +35,16 @@ pub fn limpar_console() {
     } else {
         let _ = Command::new("sh").arg("-c").arg("clear").status();
     }
+}
+
+enum Entrada{
+    Adicionar,
+    Iniciar,
+    Completar,
+    Remover,
+    Listar,
+    Voltar,
+    Sair
 }
 
 
@@ -54,6 +65,9 @@ fn trim_margin(s: &str) -> String {
 }
 
 
+
+
+
 pub fn loop_principal() {
     let mut lista_de_tarefas = ListaDeTarefas::new();
 
@@ -71,7 +85,8 @@ pub fn loop_principal() {
         3. Completar tarefa
         4. Remover tarefa
         5. Listar tarefas
-        6. Sair ";
+        6. Voltar par estado não iniciada
+        7. Sair ";
         print_handler(&trim_margin(s));
 
 
@@ -131,7 +146,7 @@ pub fn loop_principal() {
                         lista_de_tarefas.listar_tarefas(None, None);
                         trigger_continue();
                     }
-                    "6" => {
+                    "7" => {
                         break;
                     }
                     _ => {
