@@ -43,12 +43,31 @@ enum Entrada{
     Completar,
     Remover,
     Listar,
-    Voltar,
-    Sair
+    Rollback,
+    Sair,
+    ValorInvalido
 }
 
 
-pub fn atribuir_entrada_enum(){
+pub fn atribuir_comando_enum()-> Entrada{
+    match tratar_input_string() {
+    Ok(entrada) => {
+        match entrada.as_str() {
+            "1" => {return Entrada::Adicionar; }
+            "2" => { return Entrada::Iniciar; }
+            "3" => { return Entrada::Completar; }
+            "4" => { return Entrada::Remover; }
+            "5" => { return Entrada::Listar; }
+            "6" =>{ return Entrada::Rollback; }
+            "7" => { return Entrada::Sair; }
+            _ => { return Entrada::ValorInvalido; }
+        }
+    }
+    Err(err) => {
+        println!("Erro de entrada: {}", err);
+        return Entrada::ValorInvalido;
+    }
+}
 
 }
 
@@ -88,77 +107,74 @@ pub fn loop_principal() {
         6. Voltar par estado não iniciada
         7. Sair ";
         print_handler(&trim_margin(s));
+        let comando= atribuir_comando_enum();
 
-
-        match tratar_input_string() {
-            Ok(entrada) => {
-                match entrada.as_str() {
-                    "1" => {
-                        println!("Digite a descrição da tarefa:");
-                        match tratar_input_string() {
-                            Ok(input) if !input.is_empty() => {
-                                lista_de_tarefas.adicionar_tarefa(input);
-                            }
-                            _ => {
-                                println!("String vazia, você será encaminhado ao menu");
-                                trigger_continue();
-                            }
-                        }
-                    }
-                    "2" => {
-                        println!("Escolha a tarefa a ser iniciada, pelo índice:");
-                        lista_de_tarefas.listar_tarefas(Option::from(Estado::NaoIniciada), None);
-                        match tratar_input_int() {
-                            Ok(indice) => {
-                                lista_de_tarefas.iniciar_tarefa(indice - 1);
-                            }
-                            Err(err) => {
-                                println!("Erro ao ler o índice: {}", err);
-                            }
-                        }
-                    }
-                    "3" => {
-                        println!("Escolha a tarefa a ser marcada como concluída, pelo índice:");
-                        lista_de_tarefas.listar_tarefas(Option::from(Estado::NaoIniciada), Option::from(Estado::EmAndamento));
-                        match tratar_input_int() {
-                            Ok(indice) => {
-                                lista_de_tarefas.completar_tarefa(indice - 1);
-                            }
-                            Err(err) => {
-                                println!("Erro ao ler o índice: {}", err);
-                                trigger_continue();
-                            }
-                        }
-                    }
-                    "4" => {
-                        println!("Escolha a tarefa a ser removida, pelo índice:");
-                        lista_de_tarefas.listar_tarefas(None, None);
-                        match tratar_input_int() {
-                            Ok(indice) => {
-                                lista_de_tarefas.remover_tarefa(indice - 1);
-                            }
-                            Err(err) => {
-                                println!("Erro ao ler o índice: {}", err);
-                            }
-                        }
-                    }
-                    "5" => {
-                        lista_de_tarefas.listar_tarefas(None, None);
-                        trigger_continue();
-                    }
-                    "7" => {
-                        break;
+        match comando{
+            Entrada::Adicionar => {
+                println!("Digite a descrição da tarefa:");
+                match tratar_input_string() {
+                    Ok(input) if !input.is_empty() => {
+                        lista_de_tarefas.adicionar_tarefa(input);
                     }
                     _ => {
-                        println!("Escolha inválida");
+                        println!("String vazia, você será encaminhado ao menu");
+                        trigger_continue();
+                    }
+                }
+
+            }
+            Entrada::Iniciar => {
+                println!("Escolha a tarefa a ser iniciada, pelo índice:");
+                lista_de_tarefas.listar_tarefas(Option::from(Estado::NaoIniciada), None);
+                match tratar_input_int() {
+                    Ok(indice) => {
+                        lista_de_tarefas.iniciar_tarefa(indice - 1);
+                    }
+                    Err(err) => {
+                        println!("Erro ao ler o índice: {}", err);
+                    }
+                }
+
+            }
+            Entrada::Completar => {
+                println!("Escolha a tarefa a ser marcada como concluída, pelo índice:");
+                lista_de_tarefas.listar_tarefas(Option::from(Estado::NaoIniciada), Option::from(Estado::EmAndamento));
+                match tratar_input_int() {
+                    Ok(indice) => {
+                        lista_de_tarefas.completar_tarefa(indice - 1);
+                    }
+                    Err(err) => {
+                        println!("Erro ao ler o índice: {}", err);
                         trigger_continue();
                     }
                 }
             }
-            Err(err) => {
-                println!("Erro de entrada: {}", err);
+            Entrada::Remover => {
+                println!("Escolha a tarefa a ser removida, pelo índice:");
+                lista_de_tarefas.listar_tarefas(None, None);
+                match tratar_input_int() {
+                    Ok(indice) => {
+                        lista_de_tarefas.remover_tarefa(indice - 1);
+                    }
+                    Err(err) => {
+                        println!("Erro ao ler o índice: {}", err);
+                    }
+                }
+            }
+            Entrada::Listar => {
+                lista_de_tarefas.listar_tarefas(None, None);
+                trigger_continue();
+            }
+            Entrada::Rollback => {}
+            Entrada::Sair => {
+                break;
+            }
+            Entrada::ValorInvalido => {
+                println!("Escolha inválida");
+                trigger_continue();
             }
         }
+
     }
 }
 
@@ -187,26 +203,27 @@ pub fn loop_principal() {
 
 
 
-
-
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
-}
 
 #[cfg(test)]
 mod tests {
     use super::*;
-
+    use std::io::{self, BufRead};
     #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
+    fn test_trigger_continue() {
+        let input = "\n"; // Isso daqui é uma quebra de linha
+        let reader = io::Cursor::new(input); // Simulação do stdin
+        let mut stdin = io::BufReader::new(reader);
+
+        // Simulando a leitura de linha
+        let mut line = String::new();
+        let _ = stdin.read_line(&mut line);
+
+        // Teste se apertar enter funciona mesmo. Não tem asserteq para esse teste
     }
-
     #[test]
-    fn teste_continue(){
-
+    fn test_limpar_console() {
+        // Teste de pânico
+        limpar_console();
     }
 
 }
-
