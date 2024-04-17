@@ -64,7 +64,7 @@ pub fn atribuir_comando_enum()-> Entrada{
         }
     }
     Err(err) => {
-        println!("Erro de entrada: {}", err);
+        print_handler("Erro ao ler a entrada");
         return Entrada::ValorInvalido;
     }
 }
@@ -92,7 +92,7 @@ pub fn loop_principal() {
 
     // Carregar tarefas de um arquivo JSON, se existir
     if let Err(erro) = lista_de_tarefas.carregar_de_json("tarefas.json") {
-        eprintln!("Erro ao carregar as tarefas: {}", erro);
+        print_handler("Erro ao carregar as tarefas, um arquivo será criado");
     }
 
     loop {
@@ -111,27 +111,28 @@ pub fn loop_principal() {
 
         match comando{
             Entrada::Adicionar => {
-                println!("Digite a descrição da tarefa:");
+                print_handler("Digite a descrição da tarefa:");
                 match tratar_input_string() {
                     Ok(input) if !input.is_empty() => {
                         lista_de_tarefas.adicionar_tarefa(input);
                     }
                     _ => {
-                        println!("String vazia, você será encaminhado ao menu");
+                        print_handler("String vazia, você será encaminhado ao menu");
                         trigger_continue();
                     }
                 }
 
             }
             Entrada::Iniciar => {
-                println!("Escolha a tarefa a ser iniciada, pelo índice:");
+                print_handler("Escolha a tarefa a ser iniciada, pelo índice:");
                 lista_de_tarefas.listar_tarefas(Option::from(Estado::NaoIniciada), None);
                 match tratar_input_int() {
                     Ok(indice) => {
                         lista_de_tarefas.iniciar_tarefa(indice - 1);
                     }
                     Err(err) => {
-                        println!("Erro ao ler o índice: {}", err);
+                        print_handler("Erro ao ler o índice");
+                        trigger_continue();
                     }
                 }
 
@@ -144,7 +145,7 @@ pub fn loop_principal() {
                         lista_de_tarefas.completar_tarefa(indice - 1);
                     }
                     Err(err) => {
-                        println!("Erro ao ler o índice: {}", err);
+                        print_handler("Erro ao ler o índice");
                         trigger_continue();
                     }
                 }
@@ -165,7 +166,20 @@ pub fn loop_principal() {
                 lista_de_tarefas.listar_tarefas(None, None);
                 trigger_continue();
             }
-            Entrada::Rollback => {}
+            Entrada::Rollback => {
+                print_handler("Escolha a tarefa, pelo índice, a ser retornada ao estado inicial");
+                lista_de_tarefas.listar_tarefas(Option::from(Estado::EmAndamento),Option::from(Estado::Concluida));
+                match tratar_input_int() {
+                    Ok(indice) => {
+                        lista_de_tarefas.rollback_tarefa(indice-1);
+                    }
+                    Err(err) => {
+                        print_handler("Erro ao ler o índice");
+                        trigger_continue();
+                    }
+                }
+
+            }
             Entrada::Sair => {
                 break;
             }
@@ -177,53 +191,5 @@ pub fn loop_principal() {
 
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use std::io::{self, BufRead};
-    #[test]
-    fn test_trigger_continue() {
-        let input = "\n"; // Isso daqui é uma quebra de linha
-        let reader = io::Cursor::new(input); // Simulação do stdin
-        let mut stdin = io::BufReader::new(reader);
-
-        // Simulando a leitura de linha
-        let mut line = String::new();
-        let _ = stdin.read_line(&mut line);
-
-        // Teste se apertar enter funciona mesmo. Não tem asserteq para esse teste
-    }
-    #[test]
-    fn test_limpar_console() {
-        // Teste de pânico
-        limpar_console();
-    }
 
 }
