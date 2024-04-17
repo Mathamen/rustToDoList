@@ -2,6 +2,7 @@ use listadetarefas::{Estado, ListaDeTarefas};
 
 #[cfg(test)]
 mod tests {
+    use std::fs;
     use super::*;
 
     #[test]
@@ -11,23 +12,16 @@ mod tests {
         assert_eq!(lista.tarefas.len(), 1);
     }
 
-
-    #[test]
-    fn test_salvar_json(){
-        let mut lista = ListaDeTarefas::new();
-
-    }
-
     #[test]
     fn test_iniciar_tarefa() {
         let mut lista = ListaDeTarefas::new();
         lista.adicionar_tarefa(String::from("Teste"));
         lista.iniciar_tarefa(0);
         assert_eq!(lista.tarefas[0].estado, Estado::EmAndamento);
-       // assert_eq!(lista.tarefas[1].estado, None);
+        lista.iniciar_tarefa(20);
     }
 
-    #[test] //Este teste já não tem mais o que fazer nele
+    #[test]
     fn test_completar_tarefa() {
         let mut lista = ListaDeTarefas::new();
         lista.adicionar_tarefa(String::from("Teste"));
@@ -41,6 +35,8 @@ mod tests {
         lista.completar_tarefa(1);
         assert_eq!(lista.tarefas[1].estado, Estado::Concluida);
 
+        lista.completar_tarefa(20);
+
     }
 
     #[test]
@@ -49,6 +45,7 @@ mod tests {
         lista.adicionar_tarefa(String::from("Teste"));
         lista.remover_tarefa(0);
         assert_eq!(lista.tarefas.len(), 0);
+        lista.remover_tarefa(20);
     }
 
     #[test]
@@ -118,6 +115,41 @@ mod tests {
         });
         assert!(result.is_ok(), "Failed to list tasks by state (Não Iniciada e EmAndamento)");
     }
+
+    #[test]
+    fn test_salvar_e_carregar_json() {
+        let mut lista = ListaDeTarefas::new();
+        lista.adicionar_tarefa(String::from("Tarefa 1"));
+        lista.adicionar_tarefa(String::from("Tarefa 2"));
+        let nome_arquivo = "test.json";
+        assert!(lista.salvar_em_json(nome_arquivo).is_ok());
+        let mut lista_carregada = ListaDeTarefas::new();
+        assert!(lista_carregada.carregar_de_json(nome_arquivo).is_ok());
+        assert_eq!(lista.tarefas, lista_carregada.tarefas);
+        fs::remove_file(nome_arquivo).unwrap();
+    }
+
+    #[test]
+    fn test_carregar_json_invalido() {
+        let nome_arquivo = "invalid.json";
+        fs::write(nome_arquivo, "Este não é um JSON válido").unwrap();
+        let mut lista = ListaDeTarefas::new();
+        let resultado = lista.carregar_de_json(nome_arquivo);
+        assert!(resultado.is_err(), "Deveria falhar ao carregar um JSON inválido");
+        fs::remove_file(nome_arquivo).unwrap();
+    }
+
+
+    #[test]
+    fn test_rollback_tarefa() {
+        let mut lista = ListaDeTarefas::new();
+        lista.adicionar_tarefa(String::from("Teste"));
+        lista.completar_tarefa(0);
+        lista.rollback_tarefa(0);
+        assert_eq!(lista.tarefas[0].estado, Estado::NaoIniciada);
+    }
+
+
 
 }
 

@@ -36,5 +36,5 @@ Ao executar o programa, você será apresentado a um menu com as seguintes opç�
 Escolha o número correspondente à ação desejada e siga as instruções na tela.
 
 ### Testes automatizados
-Este projeto inclui testes automatizados para garantir o correto funcionamento das funcionalidades. Para executar os testes, você pode usar o comando cargo test, em cada crate. Neste projeto foi utilizado o tarpaulin. Para a crate listadetarefas, o tarpaulin apontou 72% de cobertura. Para a crate entradaesaida, apresentou X.
+Este projeto inclui testes automatizados para garantir o correto funcionamento das funcionalidades. Para executar os testes, você pode usar o comando cargo test, em cada crate. Neste projeto foi utilizado o tarpaulin. Para a crate listadetarefas, o tarpaulin apontou 82.26% de cobertura. Para a crate entradaesaida, apresentou X.
 

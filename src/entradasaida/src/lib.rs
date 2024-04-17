@@ -1,8 +1,6 @@
-use std::fs::File;
 use std::io;
 use std::process::Command;
-use listadetarefas::{Estado, ListaDeTarefas, Tarefa};
-use chrono::Local;
+use listadetarefas::{Estado, ListaDeTarefas};
 
 pub fn tratar_input_string() -> Result<String, io::Error> {
     let mut string = String::new();
@@ -27,8 +25,6 @@ pub fn trigger_continue() {
     let _ = io::stdin().read_line(&mut entrada);
 }
 
-
-
 pub fn limpar_console() {
     if cfg!(target_os = "windows") {
         let _ = Command::new("cmd").args(&["/c", "cls"]).status();
@@ -48,8 +44,7 @@ enum Entrada{
     ValorInvalido
 }
 
-
-pub fn atribuir_comando_enum()-> Entrada{
+fn atribuir_comando_enum()-> Entrada{
     match tratar_input_string() {
     Ok(entrada) => {
         match entrada.as_str() {
@@ -63,14 +58,12 @@ pub fn atribuir_comando_enum()-> Entrada{
             _ => { return Entrada::ValorInvalido; }
         }
     }
-    Err(err) => {
+    Err(_err) => {
         print_handler("Erro ao ler a entrada");
         return Entrada::ValorInvalido;
     }
 }
-
 }
-
 
 pub fn print_handler(s: &str) {
     println!("{}", s);
@@ -83,15 +76,11 @@ fn trim_margin(s: &str) -> String {
         .join("\n")
 }
 
-
-
-
-
 pub fn loop_principal() {
     let mut lista_de_tarefas = ListaDeTarefas::new();
 
     // Carregar tarefas de um arquivo JSON, se existir
-    if let Err(erro) = lista_de_tarefas.carregar_de_json("tarefas.json") {
+    if let Err(_err) = lista_de_tarefas.carregar_de_json("tarefas.json") {
         print_handler("Erro ao carregar as tarefas, um arquivo será criado");
     }
 
@@ -130,7 +119,7 @@ pub fn loop_principal() {
                     Ok(indice) => {
                         lista_de_tarefas.iniciar_tarefa(indice - 1);
                     }
-                    Err(err) => {
+                    Err(_err) => {
                         print_handler("Erro ao ler o índice");
                         trigger_continue();
                     }
@@ -144,7 +133,7 @@ pub fn loop_principal() {
                     Ok(indice) => {
                         lista_de_tarefas.completar_tarefa(indice - 1);
                     }
-                    Err(err) => {
+                    Err(_err) => {
                         print_handler("Erro ao ler o índice");
                         trigger_continue();
                     }
@@ -173,7 +162,7 @@ pub fn loop_principal() {
                     Ok(indice) => {
                         lista_de_tarefas.rollback_tarefa(indice-1);
                     }
-                    Err(err) => {
+                    Err(_err) => {
                         print_handler("Erro ao ler o índice");
                         trigger_continue();
                     }
