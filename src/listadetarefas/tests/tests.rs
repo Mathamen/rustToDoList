@@ -11,12 +11,20 @@ mod tests {
         assert_eq!(lista.tarefas.len(), 1);
     }
 
+
+    #[test]
+    fn test_salvar_json(){
+        let mut lista = ListaDeTarefas::new();
+
+    }
+
     #[test]
     fn test_iniciar_tarefa() {
         let mut lista = ListaDeTarefas::new();
         lista.adicionar_tarefa(String::from("Teste"));
         lista.iniciar_tarefa(0);
         assert_eq!(lista.tarefas[0].estado, Estado::EmAndamento);
+       // assert_eq!(lista.tarefas[1].estado, None);
     }
 
     #[test] //Este teste já não tem mais o que fazer nele

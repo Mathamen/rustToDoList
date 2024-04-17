@@ -191,5 +191,3 @@ pub fn loop_principal() {
 
     }
 }
-
-}
