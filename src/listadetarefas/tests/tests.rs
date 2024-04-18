@@ -18,6 +18,7 @@ mod tests {
         lista.adicionar_tarefa(String::from("Teste"));
         lista.iniciar_tarefa(0);
         assert_eq!(lista.tarefas[0].estado, Estado::EmAndamento);
+        lista.iniciar_tarefa(0);
         lista.iniciar_tarefa(20);
     }
 
@@ -28,6 +29,7 @@ mod tests {
         assert_eq!(lista.tarefas[0].estado, Estado::NaoIniciada);
         lista.completar_tarefa(0);
         assert_eq!(lista.tarefas[0].estado, Estado::Concluida);
+        lista.completar_tarefa(0);
 
         lista.adicionar_tarefa(String::from("Teste2"));
         lista.iniciar_tarefa(1);
@@ -42,6 +44,7 @@ mod tests {
     #[test]
     fn test_remover_tarefa() {
         let mut lista = ListaDeTarefas::new();
+        lista.remover_tarefa(0);
         lista.adicionar_tarefa(String::from("Teste"));
         lista.remover_tarefa(0);
         assert_eq!(lista.tarefas.len(), 0);
@@ -61,8 +64,10 @@ mod tests {
     #[test]
     fn test_listar_tarefas() {
         let mut lista = ListaDeTarefas::new();
+        lista.listar_tarefas(None, None);
         lista.adicionar_tarefa(String::from("Tarefa 1"));
         lista.adicionar_tarefa(String::from("Tarefa 2"));
+        lista.adicionar_tarefa(String::from("Tarefa 3"));
         lista.iniciar_tarefa(0);
         lista.completar_tarefa(1);
 
@@ -147,6 +152,14 @@ mod tests {
         lista.completar_tarefa(0);
         lista.rollback_tarefa(0);
         assert_eq!(lista.tarefas[0].estado, Estado::NaoIniciada);
+
+        lista.adicionar_tarefa(String::from("Teste2"));
+        lista.iniciar_tarefa(1);
+        lista.rollback_tarefa(1);
+        assert_eq!(lista.tarefas[0].estado, Estado::NaoIniciada);
+
+        lista.rollback_tarefa(0);
+        lista.rollback_tarefa(5);
     }
 
 
