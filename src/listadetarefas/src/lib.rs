@@ -83,31 +83,38 @@ impl ListaDeTarefas {
         }
     }
 
+
+
     pub fn listar_tarefas(&self, estado1: Option<Estado>, estado2: Option<Estado>) {
         println!("Lista de Tarefas:");
 
-        // Filtra as tarefas
-        let filtered_tasks = self.tarefas.iter().filter(|tarefa| {
-            if let Some(ref estado1) = estado1 {
-                if tarefa.estado != *estado1 {return false;}
-            }
-
-            if let Some(ref estado2) = estado2 {
-                if tarefa.estado != *estado2 {return false;}
-            }
-            true
-        });
-
-        // Imprimindo das filtradas
-        for (indice, tarefa) in filtered_tasks.enumerate() {
+        for (indice, tarefa) in self.tarefas.iter().enumerate() {
             let status = match tarefa.estado {
                 Estado::NaoIniciada => " (Não Iniciada)",
                 Estado::EmAndamento => " (Em Andamento)",
                 Estado::Concluida => " (Concluída)",
             };
-            println!("{} : {}: {}{}", indice + 1, tarefa.data, tarefa.descricao, status);
+
+            if let Some(est1) = estado1.as_ref() {
+                if *est1 == tarefa.estado {
+                    println!("{} : {}: {}{}", indice + 1, tarefa.data, tarefa.descricao, status);
+                    continue;
+                }
+            }
+
+            if let Some(est2) = estado2.as_ref() {
+                if *est2 == tarefa.estado {
+                    println!("{} : {}: {}{}", indice + 1, tarefa.data, tarefa.descricao, status);
+                    continue;
+                }
+            }
+
+            if estado1.is_none() && estado2.is_none() {
+                println!("{} : {}: {}{}", indice + 1, tarefa.data, tarefa.descricao, status);
+            }
         }
     }
+
 
     pub fn rollback_tarefa(&mut self, indice: usize){
         if let Some(tarefa) = self.tarefas.get_mut(indice) {
