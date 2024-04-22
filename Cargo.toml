@@ -1,4 +1,4 @@
-workspace = { members = [ "src/entradasaida","src/listadetarefas"] }
+workspace = { members = [ "src/entradasaida","src/listadetarefas", "src/mock"] }
 [package]
 name = "todolist"
 version = "0.1.0"
@@ -10,5 +10,5 @@ edition = "2021"
 serde = { version = "1.0.197", features = ["derive"] }
 serde_json = "1.0.114"
 chrono = "0.4.35"
-listadetarefas = {path = "/Users/mathe/Desktop/programacao/gits/rustToDoList/src/listadetarefas"}
-entradasaida = {path = "/Users/mathe/Desktop/programacao/gits/rustToDoList/src/entradasaida"}
+listadetarefas = {path = "src/listadetarefas"}
+entradasaida = {path = "src/entradasaida"}

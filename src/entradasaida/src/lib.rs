@@ -1,6 +1,7 @@
 use std::io;
+use std::io::Error;
 use std::process::Command;
-use listadetarefas::{Estado, ListaDeTarefas};
+use listadetarefas::{Estado, ListaDeTarefas, Tarefa};
 
 pub fn tratar_input_string() -> Result<String, io::Error> {
     let mut string = String::new();
@@ -25,6 +26,9 @@ pub fn trigger_continue() {
     let _ = io::stdin().read_line(&mut entrada);
 }
 
+
+
+//testada
 pub fn limpar_console() {
     if cfg!(target_os = "windows") {
         let _ = Command::new("cmd").args(&["/c", "cls"]).status();
@@ -33,7 +37,9 @@ pub fn limpar_console() {
     }
 }
 
-enum Entrada{
+
+#[derive(PartialEq, Debug)]
+pub enum Entrada{
     Adicionar,
     Iniciar,
     Completar,
@@ -44,9 +50,10 @@ enum Entrada{
     ValorInvalido
 }
 
-fn atribuir_comando_enum()-> Entrada{
-    match tratar_input_string() {
-    Ok(entrada) => {
+
+
+//testada
+pub fn atribuir_comando_enum(entrada: String) -> Entrada{
         match entrada.as_str() {
             "1" => {return Entrada::Adicionar; }
             "2" => { return Entrada::Iniciar; }
@@ -58,35 +65,28 @@ fn atribuir_comando_enum()-> Entrada{
             _ => { return Entrada::ValorInvalido; }
         }
     }
-    Err(_err) => {
-        print_handler("Erro ao ler a entrada");
-        return Entrada::ValorInvalido;
-    }
-}
-}
 
+
+//testada
 pub fn print_handler(s: &str) {
     println!("{}", s);
 }
 
-fn trim_margin(s: &str) -> String {
+
+
+//testada
+pub fn trim_margin(s: &str) -> String {
     s.lines()
         .map(|line| line.trim_start())
         .collect::<Vec<_>>()
         .join("\n")
 }
 
-pub fn loop_principal() {
-    let mut lista_de_tarefas = ListaDeTarefas::new();
 
-    // Carregar tarefas de um arquivo JSON, se existir
-    if let Err(_err) = lista_de_tarefas.carregar_de_json("tarefas.json") {
-        print_handler("Erro ao carregar as tarefas, um arquivo será criado");
-    }
 
-    loop {
-        limpar_console();
-        let s = "
+//testada
+pub fn give_texto() -> &'static str {
+    let s = "
         Escolha uma ação:
         1. Adicionar tarefa
         2. Iniciar tarefa
@@ -95,20 +95,66 @@ pub fn loop_principal() {
         5. Listar tarefas
         6. Voltar par estado não iniciada
         7. Sair ";
+    return s;
+}
+
+
+
+//testada
+pub fn abrir_arquivo() -> ListaDeTarefas {
+    let mut lista_de_tarefas = ListaDeTarefas::new();
+
+    // Carregar tarefas de um arquivo JSON, se existir
+    if let Err(_err) = lista_de_tarefas.carregar_de_json("tarefas.json") {
+        print_handler("Erro ao carregar as tarefas, um arquivo será criado");
+    }
+
+    return lista_de_tarefas;
+
+}
+
+
+pub fn adicionar_tarefa(mut lista_de_tarefas:&mut ListaDeTarefas, input: String) {
+    if (input.eq("")){
+        print_handler("A string está vazia. Você será retornado ao menu");
+        return;
+    }
+
+    lista_de_tarefas.adicionar_tarefa(input);
+    print_handler("Tarefa adicionada com sucesso!");
+}
+
+
+
+
+
+
+
+
+
+
+
+pub fn loop_principal() {
+    let mut lista_de_tarefas = abrir_arquivo();
+
+    loop {
+        limpar_console();
+        let s= give_texto();
         print_handler(&trim_margin(s));
-        let comando= atribuir_comando_enum();
+        let comando;
+        match tratar_input_string() {
+            Ok(entrada) => {comando =atribuir_comando_enum(entrada);}
+            Err(_) => {comando = Entrada::ValorInvalido;}
+        }
 
         match comando{
             Entrada::Adicionar => {
                 print_handler("Digite a descrição da tarefa:");
                 match tratar_input_string() {
-                    Ok(input) if !input.is_empty() => {
-                        lista_de_tarefas.adicionar_tarefa(input);
+                    Ok(input) if !input.is_empty() => { //outra checagem de string vazia
+                        adicionar_tarefa(&mut lista_de_tarefas, input);
                     }
-                    _ => {
-                        print_handler("String vazia, você será encaminhado ao menu");
-                        trigger_continue();
-                    }
+                    _ => {} //string vazia aqui
                 }
 
             }
@@ -119,10 +165,7 @@ pub fn loop_principal() {
                     Ok(indice) => {
                         lista_de_tarefas.iniciar_tarefa(indice - 1);
                     }
-                    Err(_err) => {
-                        print_handler("Erro ao ler o índice");
-                        trigger_continue();
-                    }
+                    Err(_err) => { print_handler("Erro ao ler o índice"); }
                 }
 
             }
@@ -133,10 +176,7 @@ pub fn loop_principal() {
                     Ok(indice) => {
                         lista_de_tarefas.completar_tarefa(indice - 1);
                     }
-                    Err(_err) => {
-                        print_handler("Erro ao ler o índice");
-                        trigger_continue();
-                    }
+                    Err(_err) => {} //erro ao ler o índice
                 }
             }
             Entrada::Remover => {
@@ -146,15 +186,11 @@ pub fn loop_principal() {
                     Ok(indice) => {
                         lista_de_tarefas.remover_tarefa(indice - 1);
                     }
-                    Err(err) => {
-                        println!("Erro ao ler o índice: {}", err);
-                    }
+                    Err(_) => { } //erro ao ler o índice
                 }
             }
-            Entrada::Listar => {
-                lista_de_tarefas.listar_tarefas(None, None);
-                trigger_continue();
-            }
+
+            Entrada::Listar => { lista_de_tarefas.listar_tarefas(None, None);  trigger_continue();}
             Entrada::Rollback => {
                 print_handler("Escolha a tarefa, pelo índice, a ser retornada ao estado inicial");
                 lista_de_tarefas.listar_tarefas(Option::from(Estado::EmAndamento),Option::from(Estado::Concluida));
@@ -162,10 +198,7 @@ pub fn loop_principal() {
                     Ok(indice) => {
                         lista_de_tarefas.rollback_tarefa(indice-1);
                     }
-                    Err(_err) => {
-                        print_handler("Erro ao ler o índice");
-                        trigger_continue();
-                    }
+                    Err(_err) => {} //erro ao ler o índice
                 }
 
             }
@@ -174,9 +207,9 @@ pub fn loop_principal() {
             }
             Entrada::ValorInvalido => {
                 println!("Escolha inválida");
-                trigger_continue();
             }
         }
 
     }
 }
+
