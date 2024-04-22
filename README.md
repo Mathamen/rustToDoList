@@ -21,7 +21,7 @@ Certifique-se de ter o Rust instalado em seu sistema. Você pode encontrar instr
 * Clone este repositório em seu ambiente local. -> ```git clone https://github.com/Mathamen/rustToDoList```
 * Navegue até o diretório raiz do projeto. -> ```cd rustToDoList```
 * Execute o comando cargo run para compilar e executar o projeto. -> ```cargo run```
-* 
+  
 Comandos disponíveis
 
 Ao executar o programa, você será apresentado a um menu com as seguintes opções:
