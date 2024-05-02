@@ -83,6 +83,12 @@ impl ListaDeTarefas {
         }
     }
 
+    pub fn editar_tarefa(&mut self, indice: usize, descricao: String){
+        if let Some(tarefa) = self.tarefas.get_mut(indice) {
+            tarefa.descricao = descricao;
+        }
+    }
+
 
 
     pub fn listar_tarefas(&self, estado1: Option<Estado>, estado2: Option<Estado>) {

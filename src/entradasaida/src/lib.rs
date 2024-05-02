@@ -46,6 +46,7 @@ pub enum Entrada{
     Remover,
     Listar,
     Rollback,
+    EditarTarefa,
     Sair,
     ValorInvalido
 }
@@ -60,9 +61,10 @@ pub fn atribuir_comando_enum(entrada: String) -> Entrada{
             "3" => { return Entrada::Completar; }
             "4" => { return Entrada::Remover; }
             "5" => { return Entrada::Listar; }
-            "6" =>{ return Entrada::Rollback; }
-            "7" => { return Entrada::Sair; }
-            _ => { return Entrada::ValorInvalido; }
+            "6" => { return Entrada::Rollback; }
+            "7" => { return Entrada::EditarTarefa; }
+            "8" => {return Entrada::Sair;}
+            _ =>   { return Entrada::ValorInvalido; }
         }
     }
 
@@ -94,7 +96,8 @@ pub fn give_texto() -> &'static str {
         4. Remover tarefa
         5. Listar tarefas
         6. Voltar par estado não iniciada
-        7. Sair ";
+        7. Mudar descrição de tarefa
+        8. Sair ";
     return s;
 }
 
@@ -201,6 +204,23 @@ pub fn loop_principal() {
                     Err(_err) => {} //erro ao ler o índice
                 }
 
+            }
+            Entrada::EditarTarefa => {
+                println!("Escolha a tarefa a ser editada, pelo índice");
+                lista_de_tarefas.listar_tarefas(None, None);
+                match tratar_input_int() {
+                    Ok(indice) => {
+                        println!("Digite agora a nova descrição da tarefa");
+                        match tratar_input_string() {
+                            Ok(descricao) => {
+                                lista_de_tarefas.editar_tarefa(indice - 1, descricao);
+                            }
+                            Err(_) => {}
+                        }
+
+                    }
+                    Err(_) => { } //erro ao ler o índice
+                }
             }
             Entrada::Sair => {
                 break;
