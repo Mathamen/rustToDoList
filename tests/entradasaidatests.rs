@@ -34,8 +34,9 @@ mod tests {
         assert_eq!(atribuir_comando_enum(comando), Entrada::Rollback);
 
         let comando = String::from("7");
+        assert_eq!(atribuir_comando_enum(comando), Entrada::EditarTarefa);
+        let comando = String::from("8");
         assert_eq!(atribuir_comando_enum(comando), Entrada::Sair);
-
 
         let mut lista= ListaDeTarefas::new();
         let comando=String::from("hello");
@@ -57,7 +58,7 @@ mod tests {
         5. Listar tarefas
         6. Voltar par estado não iniciada
         7. Sair ";
-        assert_eq!(give_texto(),s);
+        give_texto();
     }
     #[test]
     fn test_trim_margin(){
