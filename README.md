@@ -18,9 +18,10 @@ Este projeto implementa uma lista de tarefas (ToDoList) em Rust. Ele permite adi
 Certifique-se de ter o Rust instalado em seu sistema. Você pode encontrar instruções de instalação no site oficial do Rust.
 
 ### Como usar
-* Clone este repositório em seu ambiente local.
-* Navegue até o diretório raiz do projeto.
-* Execute o comando cargo run para compilar e executar o projeto.
+* Clone este repositório em seu ambiente local. -> ```git clone https://github.com/Mathamen/rustToDoList```
+* Navegue até o diretório raiz do projeto. -> ```cd rustToDoList```
+* Execute o comando cargo run para compilar e executar o projeto. -> ```cargo run```
+  
 Comandos disponíveis
 
 Ao executar o programa, você será apresentado a um menu com as seguintes opções:
@@ -36,5 +37,5 @@ Ao executar o programa, você será apresentado a um menu com as seguintes opç�
 Escolha o número correspondente à ação desejada e siga as instruções na tela.
 
 ### Testes automatizados
-Este projeto inclui testes automatizados para garantir o correto funcionamento das funcionalidades. Para executar os testes, você pode usar o comando cargo test, em cada crate. Neste projeto foi utilizado o tarpaulin. Para a crate listadetarefas, o tarpaulin apontou 90.32% de cobertura. Para a crate entradaesaida, apresentou X.
+Este projeto inclui testes automatizados para garantir o correto funcionamento das funcionalidades. Para executar os testes, você pode usar o comando cargo test, em cada crate. Neste projeto foi utilizado o tarpaulin. Para a crate listadetarefas, o tarpaulin apontou 90.62% de cobertura. 
 
