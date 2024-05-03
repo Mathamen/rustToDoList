@@ -12,3 +12,4 @@ serde_json = "1.0.114"
 chrono = "0.4.35"
 listadetarefas = {path = "src/listadetarefas"}
 entradasaida = {path = "src/entradasaida"}
+mock = {path = "src/mock"}

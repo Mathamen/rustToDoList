@@ -13,7 +13,7 @@ pub enum Estado {
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 pub struct Tarefa {
     data: String,
-    descricao: String,
+    pub descricao: String,
     pub estado: Estado,
 }
 
@@ -41,7 +41,7 @@ impl ListaDeTarefas {
         let new_tarefa = Tarefa::new(descricao);
         self.tarefas.push(new_tarefa);
         self.salvar_em_json("tarefas.json").unwrap_or_else(|err| {
-            eprintln!("Erro ao salvar as tarefas: {}", err);
+           // eprintln!("Erro ao salvar as tarefas: {}", err);
         });
     }
     pub fn iniciar_tarefa(&mut self, indice: usize) {
@@ -49,7 +49,7 @@ impl ListaDeTarefas {
             if tarefa.estado == Estado::NaoIniciada {
                 tarefa.estado = Estado::EmAndamento;
             self.salvar_em_json("tarefas.json").unwrap_or_else(|err| {
-                eprintln!("Erro ao salvar as tarefas: {}", err);
+               // eprintln!("Erro ao salvar as tarefas: {}", err);
             });
             } else{
                 println!("Você escolheu uma inválida!")
@@ -66,7 +66,7 @@ impl ListaDeTarefas {
                 println!("Esta tarefa já estava concluída, inválido!")
             }
             self.salvar_em_json("tarefas.json").unwrap_or_else(|err| {
-                eprintln!("Erro ao salvar as tarefas: {}", err);
+              //  eprintln!("Erro ao salvar as tarefas: {}", err);
             });
         } else {
             println!("Índice inválido!");
@@ -76,7 +76,7 @@ impl ListaDeTarefas {
         if indice < self.tarefas.len() {
             self.tarefas.remove(indice);
             self.salvar_em_json("tarefas.json").unwrap_or_else(|err| {
-                eprintln!("Erro ao salvar as tarefas: {}", err);
+               // eprintln!("Erro ao salvar as tarefas: {}", err);
             });
         } else {
             println!("Índice inválido!");
@@ -130,7 +130,7 @@ impl ListaDeTarefas {
                 println!("Esta tarefa já estava sem ser iniciada, inválido!")
             }
             self.salvar_em_json("tarefas.json").unwrap_or_else(|err| {
-                eprintln!("Erro ao salvar as tarefas: {}", err);
+              //  eprintln!("Erro ao salvar as tarefas: {}", err);
             });
         } else {
             println!("Índice inválido!");

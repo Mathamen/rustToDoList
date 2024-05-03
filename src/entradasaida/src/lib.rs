@@ -1,11 +1,13 @@
 use std::io;
-use std::io::Error;
+use std::io::{BufRead, Error, ErrorKind, Write};
 use std::process::Command;
 use listadetarefas::{Estado, ListaDeTarefas, Tarefa};
+use mock::IOMock;
 
-pub fn tratar_input_string() -> Result<String, io::Error> {
+
+pub fn tratar_input_string(io_mock: &mut IOMock<impl BufRead, impl Write>) -> Result<String, io::Error> {
     let mut string = String::new();
-    io::stdin().read_line(&mut string)?;
+    io_mock.reader.read_line(&mut string)?;
     let string = string.trim().to_string();
     if string.is_empty() {
         Err(io::Error::new(io::ErrorKind::InvalidData, "String vazia"))
@@ -14,21 +16,22 @@ pub fn tratar_input_string() -> Result<String, io::Error> {
     }
 }
 
-pub fn tratar_input_int() -> Result<usize, io::Error> {
-    tratar_input_string()?
+pub fn tratar_input_int(quizzer: &mut IOMock<impl BufRead, impl Write>) -> Result<usize, Error> {
+    let input_string = tratar_input_string(quizzer)?;
+    input_string
         .parse::<usize>()
-        .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))
+        .map_err(|e| Error::new(ErrorKind::InvalidData, e))
 }
 
-pub fn trigger_continue() {
+pub fn trigger_continue(quizzer: &mut IOMock<impl BufRead, impl Write>) {
     let mut entrada = String::new();
-    print_handler("Pressione Enter para continuar...");
-    let _ = io::stdin().read_line(&mut entrada);
+    quizzer.prompt("Pressione Enter para continuar...");
+    let _ = entrada;
 }
 
 
 
-//testada
+
 pub fn limpar_console() {
     if cfg!(target_os = "windows") {
         let _ = Command::new("cmd").args(&["/c", "cls"]).status();
@@ -53,7 +56,6 @@ pub enum Entrada{
 
 
 
-//testada
 pub fn atribuir_comando_enum(entrada: String) -> Entrada{
     return match entrada.as_str() {
         "1" => { Entrada::Adicionar }
@@ -69,14 +71,11 @@ pub fn atribuir_comando_enum(entrada: String) -> Entrada{
     }
 
 
-//testada
 pub fn print_handler(s: &str) {
     println!("{}", s);
 }
 
 
-
-//testada
 pub fn trim_margin(s: &str) -> String {
     s.lines()
         .map(|line| line.trim_start())
@@ -86,7 +85,6 @@ pub fn trim_margin(s: &str) -> String {
 
 
 
-//testada
 pub fn give_texto() -> &'static str {
     let s = "
         Escolha uma ação:
@@ -102,8 +100,6 @@ pub fn give_texto() -> &'static str {
 }
 
 
-
-//testada
 pub fn abrir_arquivo() -> ListaDeTarefas {
     let mut lista_de_tarefas = ListaDeTarefas::new();
 
@@ -138,6 +134,17 @@ pub fn adicionar_tarefa(mut lista_de_tarefas:&mut ListaDeTarefas, input: String)
 
 
 pub fn loop_principal() {
+    let stdio = io::stdin();
+    let input = stdio.lock();
+
+    let output = io::stdout();
+    // TODO trocar o nome do IOMock de quizzer para qualquer outra coisa no arquivo
+    let mut quizzer = IOMock {
+        reader: input,
+        writer: output,
+    };
+
+
     let mut lista_de_tarefas = abrir_arquivo();
 
     loop {
@@ -145,7 +152,7 @@ pub fn loop_principal() {
         let s= give_texto();
         print_handler(&trim_margin(s));
         let comando;
-        match tratar_input_string() {
+        match tratar_input_string(&mut quizzer) {
             Ok(entrada) => {comando =atribuir_comando_enum(entrada);}
             Err(_) => {comando = Entrada::ValorInvalido;}
         }
@@ -153,7 +160,7 @@ pub fn loop_principal() {
         match comando{
             Entrada::Adicionar => {
                 print_handler("Digite a descrição da tarefa:");
-                match tratar_input_string() {
+                match tratar_input_string(&mut quizzer) {
                     Ok(input) if !input.is_empty() => { //outra checagem de string vazia
                         adicionar_tarefa(&mut lista_de_tarefas, input);
                     }
@@ -164,18 +171,19 @@ pub fn loop_principal() {
             Entrada::Iniciar => {
                 print_handler("Escolha a tarefa a ser iniciada, pelo índice:");
                 lista_de_tarefas.listar_tarefas(Option::from(Estado::NaoIniciada), None);
-                match tratar_input_int() {
+                match tratar_input_int(&mut quizzer) {
                     Ok(indice) => {
                         lista_de_tarefas.iniciar_tarefa(indice - 1);
                     }
-                    Err(_err) => { print_handler("Erro ao ler o índice"); }
+                    Err(_err) => { // print_handler("Erro ao ler o índice");
+                    }
                 }
 
             }
             Entrada::Completar => {
                 println!("Escolha a tarefa a ser marcada como concluída, pelo índice:");
                 lista_de_tarefas.listar_tarefas(Option::from(Estado::NaoIniciada), Option::from(Estado::EmAndamento));
-                match tratar_input_int() {
+                match tratar_input_int(&mut quizzer) {
                     Ok(indice) => {
                         lista_de_tarefas.completar_tarefa(indice - 1);
                     }
@@ -185,7 +193,7 @@ pub fn loop_principal() {
             Entrada::Remover => {
                 println!("Escolha a tarefa a ser removida, pelo índice:");
                 lista_de_tarefas.listar_tarefas(None, None);
-                match tratar_input_int() {
+                match tratar_input_int(&mut quizzer) {
                     Ok(indice) => {
                         lista_de_tarefas.remover_tarefa(indice - 1);
                     }
@@ -193,11 +201,11 @@ pub fn loop_principal() {
                 }
             }
 
-            Entrada::Listar => { lista_de_tarefas.listar_tarefas(None, None);  trigger_continue();}
+            Entrada::Listar => { lista_de_tarefas.listar_tarefas(None, None);  trigger_continue(&mut quizzer);}
             Entrada::Rollback => {
                 print_handler("Escolha a tarefa, pelo índice, a ser retornada ao estado inicial");
                 lista_de_tarefas.listar_tarefas(Option::from(Estado::EmAndamento),Option::from(Estado::Concluida));
-                match tratar_input_int() {
+                match tratar_input_int(&mut quizzer) {
                     Ok(indice) => {
                         lista_de_tarefas.rollback_tarefa(indice-1);
                     }
@@ -208,10 +216,10 @@ pub fn loop_principal() {
             Entrada::EditarTarefa => {
                 println!("Escolha a tarefa a ser editada, pelo índice");
                 lista_de_tarefas.listar_tarefas(None, None);
-                match tratar_input_int() {
+                match tratar_input_int(&mut quizzer) {
                     Ok(indice) => {
                         println!("Digite agora a nova descrição da tarefa");
-                        match tratar_input_string() {
+                        match tratar_input_string(&mut quizzer) {
                             Ok(descricao) => {
                                 lista_de_tarefas.editar_tarefa(indice - 1, descricao);
                             }

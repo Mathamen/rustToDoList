@@ -1,47 +1,61 @@
-use std::io::{Read, Write};
+use std::io;
+use std::io::{BufRead, Write};
 
-pub struct MockInputOutput {
-    input: Vec<&'static str>,
-    output: Vec<u8>,
-    input_index: usize,
+
+
+
+pub struct IOMock<R, W> {
+    pub reader: R,
+    pub writer: W,
 }
 
-impl MockInputOutput {
-    pub fn new(input: Vec<&'static str>) -> Self {
-        MockInputOutput {
-            input,
-            output: Vec::new(),
-            input_index: 0,
-        }
+impl<R, W> IOMock<R, W>
+    where
+        R: BufRead,
+        W: Write,
+{
+    pub fn new(reader: R, writer: W) -> Self {
+        Self { reader, writer }
     }
-
-    pub fn get_output(&self) -> &[u8] {
-        &self.output
-    }
-}
-
-impl Read for MockInputOutput {
-    fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
-        if self.input_index < self.input.len() {
-            let input_str = self.input[self.input_index];
-            self.input_index += 1;
-            let bytes = input_str.as_bytes();
-            let len = std::cmp::min(bytes.len(), buf.len());
-            buf[..len].copy_from_slice(&bytes[..len]);
-            Ok(len)
-        } else {
-            Ok(0)
-        }
+    pub fn prompt(&mut self, question: &str) -> String {
+        write!(&mut self.writer, "{}", question).expect("Unable to write");
+        let mut s = String::new();
+        self.reader.read_line(&mut s).expect("Unable to read");
+        s
     }
 }
 
-impl Write for MockInputOutput {
-    fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
-        self.output.extend_from_slice(buf);
-        Ok(buf.len())
-    }
+#[test]
+fn test_with_in_memory() {
+    let input = b"I'm George";
+    let mut output = Vec::new();
 
-    fn flush(&mut self) -> std::io::Result<()> {
-        Ok(())
-    }
+    let answer = {
+        let mut quizzer = IOMock {
+            reader: &input[..],
+            writer: &mut output,
+        };
+
+        quizzer.prompt("Who goes there?")
+    };
+
+    let output = String::from_utf8(output).expect("Not UTF-8");
+
+    assert_eq!("Who goes there?", output);
+    assert_eq!("I'm George", answer);
+}
+
+pub fn mockmain() {
+    let stdio = io::stdin();
+    let input = stdio.lock();
+
+    let output = io::stdout();
+
+    let mut quizzer = IOMock {
+        reader: input,
+        writer: output,
+    };
+
+    let answer = quizzer.prompt("Who goes there?");
+    println!("was: {}", answer);
 }

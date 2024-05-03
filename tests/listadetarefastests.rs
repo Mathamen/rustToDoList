@@ -2,7 +2,10 @@ use listadetarefas::{Estado, ListaDeTarefas};
 
 #[cfg(test)]
 mod tests {
-    use std::fs;
+    use std::{fs, io};
+    use std::io::{BufRead, empty, Write};
+    use entradasaida::{tratar_input_int, tratar_input_string, trigger_continue};
+    use mock::IOMock;
     use super::*;
 
     #[test]
@@ -161,6 +164,59 @@ mod tests {
         lista.rollback_tarefa(0);
         lista.rollback_tarefa(5);
     }
+
+    #[test]
+    fn test_editar_descricao(){
+        let mut lista = ListaDeTarefas::new();
+        lista.adicionar_tarefa(String::from("Teste"));
+        lista.editar_tarefa(0, String::from("hello"));
+        assert_eq!(lista.tarefas[0].descricao, String::from("hello"))
+    }
+    #[test]
+    fn test_tratar_input_string() {
+        let input = "Hello, world!\n";
+        let mut io_mock = IOMock::new(input.as_bytes(), Vec::new());
+        let result = tratar_input_string(&mut io_mock);
+        assert_eq!(result.unwrap(), "Hello, world!");
+    }
+
+    #[test]
+    fn test_tratar_input_int() {
+        let input = "42\n";
+        let mut io_mock = IOMock::new(input.as_bytes(), Vec::new());
+        let result = tratar_input_int(&mut io_mock);
+        assert_eq!(result.unwrap(), 42);
+    }
+
+    #[test]
+    fn test_tratar_input_string_empty() {
+        let input = "\n";
+        let mut io_mock = IOMock::new(input.as_bytes(), Vec::new());
+        let result = tratar_input_string(&mut io_mock);
+        assert!(result.is_err());
+        assert_eq!(
+            result.err().unwrap().kind(),
+            io::ErrorKind::InvalidData
+        );
+    }
+    #[test]
+    fn test_tratar_input_int_empty() {
+        let input = "\n";
+        let mut io_mock = IOMock::new(input.as_bytes(), Vec::new());
+        let result = tratar_input_int(&mut io_mock);
+        assert!(result.is_err());
+        assert_eq!(
+            result.err().unwrap().kind(),
+            io::ErrorKind::InvalidData
+        );
+    }
+    #[test]
+    fn test_trigger_continue() {
+        let mut io_mock = IOMock::new(empty(), Vec::new());
+        trigger_continue(&mut io_mock);
+    }
+
+
 
 
 
