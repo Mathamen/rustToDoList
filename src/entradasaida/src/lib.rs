@@ -55,17 +55,17 @@ pub enum Entrada{
 
 //testada
 pub fn atribuir_comando_enum(entrada: String) -> Entrada{
-        match entrada.as_str() {
-            "1" => {return Entrada::Adicionar; }
-            "2" => { return Entrada::Iniciar; }
-            "3" => { return Entrada::Completar; }
-            "4" => { return Entrada::Remover; }
-            "5" => { return Entrada::Listar; }
-            "6" => { return Entrada::Rollback; }
-            "7" => { return Entrada::EditarTarefa; }
-            "8" => {return Entrada::Sair;}
-            _ =>   { return Entrada::ValorInvalido; }
-        }
+    return match entrada.as_str() {
+        "1" => { Entrada::Adicionar }
+        "2" => { Entrada::Iniciar }
+        "3" => { Entrada::Completar }
+        "4" => { Entrada::Remover }
+        "5" => { Entrada::Listar }
+        "6" => { Entrada::Rollback }
+        "7" => { Entrada::EditarTarefa }
+        "8" => { Entrada::Sair }
+        _ => { Entrada::ValorInvalido }
+    }
     }
 
 
