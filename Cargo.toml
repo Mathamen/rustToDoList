@@ -13,3 +13,7 @@ chrono = "0.4.35"
 listadetarefas = {path = "src/listadetarefas"}
 entradasaida = {path = "src/entradasaida"}
 mock = {path = "src/mock"}
+
+
+[dev-dependencies]
+assert_cmd = "1.0"

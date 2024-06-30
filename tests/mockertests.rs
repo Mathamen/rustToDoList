@@ -1,5 +1,8 @@
 use mock::IOMock;
 
+
+
+// Estes testes estão conseguindo 100% de cobertura, segundo o tarpaulin
 #[test]
 fn test_with_in_memory() {
     let input = b"I'm George";

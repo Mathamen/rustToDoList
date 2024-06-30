@@ -3,34 +3,31 @@ use std::io::{BufRead, Error, ErrorKind, Write};
 use std::process::Command;
 use listadetarefas::{Estado, ListaDeTarefas, Tarefa};
 use mock::IOMock;
+use std::process::Command as SysCommand;
 
-
-pub fn tratar_input_string(io_mock: &mut IOMock<impl BufRead, impl Write>) -> Result<String, io::Error> {
+pub fn tratar_input_string(io_mock: &mut IOMock<impl BufRead, impl Write>) -> Result<String, Error> {
     let mut string = String::new();
     io_mock.reader.read_line(&mut string)?;
     let string = string.trim().to_string();
     if string.is_empty() {
-        Err(io::Error::new(io::ErrorKind::InvalidData, "String vazia"))
+        Err(Error::new(ErrorKind::InvalidData, "String vazia"))
     } else {
         Ok(string)
     }
 }
 
-pub fn tratar_input_int(quizzer: &mut IOMock<impl BufRead, impl Write>) -> Result<usize, Error> {
-    let input_string = tratar_input_string(quizzer)?;
+pub fn tratar_input_int(io_control: &mut IOMock<impl BufRead, impl Write>) -> Result<usize, Error> {
+    let input_string = tratar_input_string(io_control)?;
     input_string
         .parse::<usize>()
         .map_err(|e| Error::new(ErrorKind::InvalidData, e))
 }
 
-pub fn trigger_continue(quizzer: &mut IOMock<impl BufRead, impl Write>) {
+pub fn trigger_continue(io_control: &mut IOMock<impl BufRead, impl Write>) {
     let mut entrada = String::new();
-    quizzer.prompt("Pressione Enter para continuar...");
+    io_control.prompt("Pressione Enter para continuar...");
     let _ = entrada;
 }
-
-
-
 
 pub fn limpar_console() {
     if cfg!(target_os = "windows") {
@@ -40,9 +37,8 @@ pub fn limpar_console() {
     }
 }
 
-
 #[derive(PartialEq, Debug)]
-pub enum Entrada{
+pub enum Entrada {
     Adicionar,
     Iniciar,
     Completar,
@@ -51,30 +47,26 @@ pub enum Entrada{
     Rollback,
     EditarTarefa,
     Sair,
-    ValorInvalido
+    ValorInvalido,
 }
 
-
-
-pub fn atribuir_comando_enum(entrada: String) -> Entrada{
-    return match entrada.as_str() {
-        "1" => { Entrada::Adicionar }
-        "2" => { Entrada::Iniciar }
-        "3" => { Entrada::Completar }
-        "4" => { Entrada::Remover }
-        "5" => { Entrada::Listar }
-        "6" => { Entrada::Rollback }
-        "7" => { Entrada::EditarTarefa }
-        "8" => { Entrada::Sair }
-        _ => { Entrada::ValorInvalido }
+pub fn atribuir_comando_enum(entrada: String) -> Entrada {
+    match entrada.as_str() {
+        "1" => Entrada::Adicionar,
+        "2" => Entrada::Iniciar,
+        "3" => Entrada::Completar,
+        "4" => Entrada::Remover,
+        "5" => Entrada::Listar,
+        "6" => Entrada::Rollback,
+        "7" => Entrada::EditarTarefa,
+        "8" => Entrada::Sair,
+        _ => Entrada::ValorInvalido,
     }
-    }
-
+}
 
 pub fn print_handler(s: &str) {
     println!("{}", s);
 }
-
 
 pub fn trim_margin(s: &str) -> String {
     s.lines()
@@ -82,8 +74,6 @@ pub fn trim_margin(s: &str) -> String {
         .collect::<Vec<_>>()
         .join("\n")
 }
-
-
 
 pub fn give_texto() -> &'static str {
     let s = "
@@ -96,9 +86,8 @@ pub fn give_texto() -> &'static str {
         6. Voltar par estado não iniciada
         7. Mudar descrição de tarefa
         8. Sair ";
-    return s;
+    s
 }
-
 
 pub fn abrir_arquivo() -> ListaDeTarefas {
     let mut lista_de_tarefas = ListaDeTarefas::new();
@@ -108,13 +97,11 @@ pub fn abrir_arquivo() -> ListaDeTarefas {
         print_handler("Erro ao carregar as tarefas, um arquivo será criado");
     }
 
-    return lista_de_tarefas;
-
+    lista_de_tarefas
 }
 
-
-pub fn adicionar_tarefa(mut lista_de_tarefas:&mut ListaDeTarefas, input: String) {
-    if (input.eq("")){
+pub fn adicionar_tarefa(mut lista_de_tarefas: &mut ListaDeTarefas, input: String) {
+    if input.eq("") {
         print_handler("A string está vazia. Você será retornado ao menu");
         return;
     }
@@ -123,111 +110,97 @@ pub fn adicionar_tarefa(mut lista_de_tarefas:&mut ListaDeTarefas, input: String)
     print_handler("Tarefa adicionada com sucesso!");
 }
 
-
-
-
-
-
-
-
-
-
-
-pub fn loop_principal() {
-    let stdio = io::stdin();
-    let input = stdio.lock();
-
-    let output = io::stdout();
-    // TODO trocar o nome do IOMock de quizzer para qualquer outra coisa no arquivo
-    let mut quizzer = IOMock {
-        reader: input,
-        writer: output,
-    };
-
-
+pub fn loop_principal(io_control: &mut IOMock<impl BufRead, impl Write>) {
     let mut lista_de_tarefas = abrir_arquivo();
 
     loop {
         limpar_console();
-        let s= give_texto();
+        let s = give_texto();
         print_handler(&trim_margin(s));
         let comando;
-        match tratar_input_string(&mut quizzer) {
-            Ok(entrada) => {comando =atribuir_comando_enum(entrada);}
-            Err(_) => {comando = Entrada::ValorInvalido;}
+        match tratar_input_string(io_control) {
+            Ok(entrada) => {
+                comando = atribuir_comando_enum(entrada);
+            }
+            Err(_) => {
+                comando = Entrada::ValorInvalido;
+            }
         }
 
-        match comando{
+        match comando {
             Entrada::Adicionar => {
                 print_handler("Digite a descrição da tarefa:");
-                match tratar_input_string(&mut quizzer) {
-                    Ok(input) if !input.is_empty() => { //outra checagem de string vazia
+                match tratar_input_string(io_control) {
+                    Ok(input) if !input.is_empty() => {
                         adicionar_tarefa(&mut lista_de_tarefas, input);
                     }
-                    _ => {} //string vazia aqui
+                    _ => {} // string vazia aqui
                 }
-
             }
             Entrada::Iniciar => {
                 print_handler("Escolha a tarefa a ser iniciada, pelo índice:");
                 lista_de_tarefas.listar_tarefas(Option::from(Estado::NaoIniciada), None);
-                match tratar_input_int(&mut quizzer) {
+                match tratar_input_int(io_control) {
                     Ok(indice) => {
                         lista_de_tarefas.iniciar_tarefa(indice - 1);
                     }
-                    Err(_err) => { // print_handler("Erro ao ler o índice");
-                    }
+                    Err(_err) => {} // print_handler("Erro ao ler o índice");
                 }
-
             }
             Entrada::Completar => {
                 println!("Escolha a tarefa a ser marcada como concluída, pelo índice:");
-                lista_de_tarefas.listar_tarefas(Option::from(Estado::NaoIniciada), Option::from(Estado::EmAndamento));
-                match tratar_input_int(&mut quizzer) {
+                lista_de_tarefas.listar_tarefas(
+                    Option::from(Estado::NaoIniciada),
+                    Option::from(Estado::EmAndamento),
+                );
+                match tratar_input_int(io_control) {
                     Ok(indice) => {
                         lista_de_tarefas.completar_tarefa(indice - 1);
                     }
-                    Err(_err) => {} //erro ao ler o índice
+                    Err(_err) => {} // erro ao ler o índice
                 }
             }
             Entrada::Remover => {
                 println!("Escolha a tarefa a ser removida, pelo índice:");
                 lista_de_tarefas.listar_tarefas(None, None);
-                match tratar_input_int(&mut quizzer) {
+                match tratar_input_int(io_control) {
                     Ok(indice) => {
                         lista_de_tarefas.remover_tarefa(indice - 1);
                     }
-                    Err(_) => { } //erro ao ler o índice
+                    Err(_) => {} // erro ao ler o índice
                 }
             }
-
-            Entrada::Listar => { lista_de_tarefas.listar_tarefas(None, None);  trigger_continue(&mut quizzer);}
+            Entrada::Listar => {
+                lista_de_tarefas.listar_tarefas(None, None);
+                trigger_continue(io_control);
+            }
             Entrada::Rollback => {
                 print_handler("Escolha a tarefa, pelo índice, a ser retornada ao estado inicial");
-                lista_de_tarefas.listar_tarefas(Option::from(Estado::EmAndamento),Option::from(Estado::Concluida));
-                match tratar_input_int(&mut quizzer) {
+                lista_de_tarefas.listar_tarefas(
+                    Option::from(Estado::EmAndamento),
+                    Option::from(Estado::Concluida),
+                );
+                match tratar_input_int(io_control) {
                     Ok(indice) => {
-                        lista_de_tarefas.rollback_tarefa(indice-1);
+                        lista_de_tarefas.rollback_tarefa(indice - 1);
                     }
-                    Err(_err) => {} //erro ao ler o índice
+                    Err(_err) => {} // erro ao ler o índice
                 }
-
             }
             Entrada::EditarTarefa => {
                 println!("Escolha a tarefa a ser editada, pelo índice");
                 lista_de_tarefas.listar_tarefas(None, None);
-                match tratar_input_int(&mut quizzer) {
+                match tratar_input_int(io_control) {
                     Ok(indice) => {
                         println!("Digite agora a nova descrição da tarefa");
-                        match tratar_input_string(&mut quizzer) {
+                        match tratar_input_string(io_control) {
                             Ok(descricao) => {
                                 lista_de_tarefas.editar_tarefa(indice - 1, descricao);
                             }
                             Err(_) => {}
                         }
-
                     }
-                    Err(_) => { } //erro ao ler o índice
+                    Err(_) => {} // erro ao ler o índice
                 }
             }
             Entrada::Sair => {
@@ -237,7 +210,8 @@ pub fn loop_principal() {
                 println!("Escolha inválida");
             }
         }
-
     }
 }
+
+
 

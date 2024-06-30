@@ -3,10 +3,16 @@ use listadetarefas::{Estado, ListaDeTarefas};
 #[cfg(test)]
 mod tests {
     use std::{fs, io};
-    use std::io::{BufRead, empty, Write};
-    use entradasaida::{tratar_input_int, tratar_input_string, trigger_continue};
+    use std::io::{Cursor, empty, Write};
+    use std::path::Path;
+    use assert_cmd::Command;
+    use std::process::Command as SysCommand;
+
+    use entradasaida::{loop_principal, tratar_input_int, tratar_input_string, trigger_continue};
     use mock::IOMock;
+
     use super::*;
+
 
     #[test]
     fn test_adicionar_tarefa() {
@@ -75,7 +81,7 @@ mod tests {
         lista.completar_tarefa(1);
 
         // Testando listar as tarefas
-        let mut output: Vec<String> = Vec::new();
+        let output: Vec<String> = Vec::new();
         let result = std::panic::catch_unwind(|| {
             lista.listar_tarefas(None, None);
         });
@@ -181,14 +187,6 @@ mod tests {
     }
 
     #[test]
-    fn test_tratar_input_int() {
-        let input = "42\n";
-        let mut io_mock = IOMock::new(input.as_bytes(), Vec::new());
-        let result = tratar_input_int(&mut io_mock);
-        assert_eq!(result.unwrap(), 42);
-    }
-
-    #[test]
     fn test_tratar_input_string_empty() {
         let input = "\n";
         let mut io_mock = IOMock::new(input.as_bytes(), Vec::new());
@@ -199,6 +197,17 @@ mod tests {
             io::ErrorKind::InvalidData
         );
     }
+
+    #[test]
+    fn test_tratar_input_int() {
+        let input = "42\n";
+        let mut io_mock = IOMock::new(input.as_bytes(), Vec::new());
+        let result = tratar_input_int(&mut io_mock);
+        assert_eq!(result.unwrap(), 42);
+
+
+    }
+
     #[test]
     fn test_tratar_input_int_empty() {
         let input = "\n";
@@ -210,12 +219,107 @@ mod tests {
             io::ErrorKind::InvalidData
         );
     }
+
     #[test]
     fn test_trigger_continue() {
         let mut io_mock = IOMock::new(empty(), Vec::new());
         trigger_continue(&mut io_mock);
     }
 
+    #[test]
+    fn test_loop_principal() {
+        let input_data = "\
+            1\n\
+            Nova tarefa\n\
+            5\n\
+            \n\
+            \n\
+
+            1\n\
+            \n\
+            \n\
+
+            2\n\
+            1\n\
+            \n\
+            \n\
+            2\n\
+            45\n\
+            \n\
+            \n\
+            2\n\
+            sagbosg\n\
+            \n\
+            \n\
+            3\n\
+            1\n\
+            3\n\
+            1\n\
+            3\n\
+            kdhgbsa\n\
+            \n\
+            \n\
+
+
+            6\n\
+            1\n\
+            6\n\
+            1\n\
+            6\n\
+            \n\
+            \n\
+
+
+           7\n\
+           1\n\
+           teste\n\
+           7\n\
+           \n\
+           7\n\
+           asogab\n\
+           \n\
+           \n\
+
+
+
+
+
+            4\n\
+            \n\
+            4\n\
+            asfasf\n\
+            4\n\
+            1\n\
+            4\n\
+            2131\n\
+
+
+
+
+
+
+
+
+
+
+
+
+
+            8\n\
+            8\n\
+            \n\
+            \n\
+            ";
+
+
+        let input = Cursor::new(input_data);
+        let output = Cursor::new(Vec::new());
+        let mut io_control = IOMock { reader: input, writer: output };
+
+        loop_principal(&mut io_control);
+
+        let output_str = String::from_utf8(io_control.writer.into_inner()).unwrap();
+    }
 
 
 

@@ -1,14 +1,12 @@
 use entradasaida::limpar_console;
 
-
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use std::io::{self, BufRead, Cursor, Read, Write};
-    use std::process::{Command, Stdio};
-    use entradasaida::{abrir_arquivo, adicionar_tarefa, atribuir_comando_enum, Entrada, give_texto,  print_handler, tratar_input_int, tratar_input_string, trigger_continue, trim_margin};
+    use std::io::Cursor;
+    use entradasaida::{abrir_arquivo, adicionar_tarefa, atribuir_comando_enum, Entrada, give_texto, print_handler, tratar_input_int, tratar_input_string, trim_margin};
     use listadetarefas::ListaDeTarefas;
-
+    use mock::IOMock;
+    use super::*;
 
     #[test]
     fn test_atribuir_entrada_enum_e_adicionar() {
@@ -79,6 +77,74 @@ mod tests {
     #[test]
     fn test_abrir_arquivo(){
         abrir_arquivo();
+    }
+    #[test]
+    fn test_tratar_input_string_ok() {
+        let input_data = "hello\n";
+        let mut io_mock = IOMock {
+            reader: Cursor::new(input_data),
+            writer: Vec::new(),
+        };
+        assert_eq!(tratar_input_string(&mut io_mock).unwrap(), "hello");
+    }
+
+    #[test]
+    fn test_tratar_input_string_empty() {
+        let input_data = "\n";
+        let mut io_mock = IOMock {
+            reader: Cursor::new(input_data),
+            writer: Vec::new(),
+        };
+        assert!(tratar_input_string(&mut io_mock).is_err());
+    }
+
+    #[test]
+    fn test_tratar_input_int_ok() {
+        let input_data = "42\n";
+        let mut io_mock = IOMock {
+            reader: Cursor::new(input_data),
+            writer: Vec::new(),
+        };
+        assert_eq!(tratar_input_int(&mut io_mock).unwrap(), 42);
+    }
+
+    #[test]
+    fn test_tratar_input_int_invalid() {
+        let input_data = "invalid\n";
+        let mut io_mock = IOMock {
+            reader: Cursor::new(input_data),
+            writer: Vec::new(),
+        };
+        assert!(tratar_input_int(&mut io_mock).is_err());
+    }
+
+    #[test]
+    fn test_atribuir_comando_enum() {
+        assert_eq!(atribuir_comando_enum("1".to_string()), Entrada::Adicionar);
+        assert_eq!(atribuir_comando_enum("8".to_string()), Entrada::Sair);
+        assert_eq!(atribuir_comando_enum("invalid".to_string()), Entrada::ValorInvalido);
+    }
+
+   // #[test]
+    //fn test_trim_margin() {
+    //    let input = "  line1\n  line2\n  line3\n";
+    //    let expected = "line1\nline2\nline3";
+   //     assert_eq!(trim_margin(input), expected);
+    //}
+
+
+    #[test]
+    fn test_adicionar_tarefa() {
+        let mut lista_de_tarefas = ListaDeTarefas::new();
+        adicionar_tarefa(&mut lista_de_tarefas, "Nova tarefa".to_string());
+        assert_eq!(lista_de_tarefas.tarefas.len(), 1);
+    }
+
+    #[test]
+    fn test_adicionar_tarefa_empty() {
+        let mut lista_de_tarefas = ListaDeTarefas::new();
+        adicionar_tarefa(&mut lista_de_tarefas, "".to_string());
+        assert_eq!(lista_de_tarefas.tarefas.len(), 0);
     }
 
 
