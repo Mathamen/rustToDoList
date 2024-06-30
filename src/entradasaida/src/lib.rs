@@ -89,29 +89,29 @@ pub fn give_texto() -> &'static str {
     s
 }
 
-pub fn abrir_arquivo() -> ListaDeTarefas {
+pub fn abrir_arquivo(nome_arquivo: &str) -> ListaDeTarefas {
     let mut lista_de_tarefas = ListaDeTarefas::new();
 
     // Carregar tarefas de um arquivo JSON, se existir
-    if let Err(_err) = lista_de_tarefas.carregar_de_json("tarefas.json") {
+    if let Err(_err) = lista_de_tarefas.carregar_de_json(nome_arquivo) {
         print_handler("Erro ao carregar as tarefas, um arquivo será criado");
     }
 
     lista_de_tarefas
 }
 
-pub fn adicionar_tarefa(mut lista_de_tarefas: &mut ListaDeTarefas, input: String) {
+pub fn adicionar_tarefa(mut lista_de_tarefas: &mut ListaDeTarefas, input: String, nome_arquivo: &str) {
     if input.eq("") {
         print_handler("A string está vazia. Você será retornado ao menu");
         return;
     }
 
-    lista_de_tarefas.adicionar_tarefa(input);
+    lista_de_tarefas.adicionar_tarefa(input, nome_arquivo);
     print_handler("Tarefa adicionada com sucesso!");
 }
 
-pub fn loop_principal(io_control: &mut IOMock<impl BufRead, impl Write>) {
-    let mut lista_de_tarefas = abrir_arquivo();
+pub fn loop_principal(io_control: &mut IOMock<impl BufRead, impl Write>, nome_arquivo: &str) {
+    let mut lista_de_tarefas = abrir_arquivo(nome_arquivo);
 
     loop {
         limpar_console();
@@ -132,7 +132,7 @@ pub fn loop_principal(io_control: &mut IOMock<impl BufRead, impl Write>) {
                 print_handler("Digite a descrição da tarefa:");
                 match tratar_input_string(io_control) {
                     Ok(input) if !input.is_empty() => {
-                        adicionar_tarefa(&mut lista_de_tarefas, input);
+                        adicionar_tarefa(&mut lista_de_tarefas, input, nome_arquivo);
                     }
                     _ => {} // string vazia aqui
                 }
@@ -142,7 +142,7 @@ pub fn loop_principal(io_control: &mut IOMock<impl BufRead, impl Write>) {
                 lista_de_tarefas.listar_tarefas(Option::from(Estado::NaoIniciada), None);
                 match tratar_input_int(io_control) {
                     Ok(indice) => {
-                        lista_de_tarefas.iniciar_tarefa(indice - 1);
+                        lista_de_tarefas.iniciar_tarefa(indice - 1, nome_arquivo);
                     }
                     Err(_err) => {} // print_handler("Erro ao ler o índice");
                 }
@@ -155,7 +155,7 @@ pub fn loop_principal(io_control: &mut IOMock<impl BufRead, impl Write>) {
                 );
                 match tratar_input_int(io_control) {
                     Ok(indice) => {
-                        lista_de_tarefas.completar_tarefa(indice - 1);
+                        lista_de_tarefas.completar_tarefa(indice - 1, nome_arquivo);
                     }
                     Err(_err) => {} // erro ao ler o índice
                 }
@@ -165,7 +165,7 @@ pub fn loop_principal(io_control: &mut IOMock<impl BufRead, impl Write>) {
                 lista_de_tarefas.listar_tarefas(None, None);
                 match tratar_input_int(io_control) {
                     Ok(indice) => {
-                        lista_de_tarefas.remover_tarefa(indice - 1);
+                        lista_de_tarefas.remover_tarefa(indice - 1,nome_arquivo);
                     }
                     Err(_) => {} // erro ao ler o índice
                 }
@@ -182,7 +182,7 @@ pub fn loop_principal(io_control: &mut IOMock<impl BufRead, impl Write>) {
                 );
                 match tratar_input_int(io_control) {
                     Ok(indice) => {
-                        lista_de_tarefas.rollback_tarefa(indice - 1);
+                        lista_de_tarefas.rollback_tarefa(indice - 1, nome_arquivo);
                     }
                     Err(_err) => {} // erro ao ler o índice
                 }
@@ -195,7 +195,7 @@ pub fn loop_principal(io_control: &mut IOMock<impl BufRead, impl Write>) {
                         println!("Digite agora a nova descrição da tarefa");
                         match tratar_input_string(io_control) {
                             Ok(descricao) => {
-                                lista_de_tarefas.editar_tarefa(indice - 1, descricao);
+                                lista_de_tarefas.editar_tarefa(indice - 1, descricao, nome_arquivo);
                             }
                             Err(_) => {}
                         }

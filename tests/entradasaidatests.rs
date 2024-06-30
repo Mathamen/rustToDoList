@@ -38,9 +38,9 @@ mod tests {
 
         let mut lista= ListaDeTarefas::new();
         let comando=String::from("hello");
-        adicionar_tarefa(&mut lista,comando);
+        adicionar_tarefa(&mut lista,comando,"test.json");
         let comando=String::from("");
-        adicionar_tarefa(&mut lista,comando);
+        adicionar_tarefa(&mut lista,comando,"test.json");
 
     }
 
@@ -76,7 +76,7 @@ mod tests {
 
     #[test]
     fn test_abrir_arquivo(){
-        abrir_arquivo();
+        abrir_arquivo("test.json");
     }
     #[test]
     fn test_tratar_input_string_ok() {
@@ -136,14 +136,14 @@ mod tests {
     #[test]
     fn test_adicionar_tarefa() {
         let mut lista_de_tarefas = ListaDeTarefas::new();
-        adicionar_tarefa(&mut lista_de_tarefas, "Nova tarefa".to_string());
+        adicionar_tarefa(&mut lista_de_tarefas, "Nova tarefa".to_string(),"test.json");
         assert_eq!(lista_de_tarefas.tarefas.len(), 1);
     }
 
     #[test]
     fn test_adicionar_tarefa_empty() {
         let mut lista_de_tarefas = ListaDeTarefas::new();
-        adicionar_tarefa(&mut lista_de_tarefas, "".to_string());
+        adicionar_tarefa(&mut lista_de_tarefas, "".to_string(),"test.json");
         assert_eq!(lista_de_tarefas.tarefas.len(), 0);
     }
 

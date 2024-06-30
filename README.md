@@ -42,4 +42,4 @@ Este projeto inclui testes automatizados para garantir o correto funcionamento d
 Como testar com tarpaulin?
 Em root, digite ``` cargo-tarpaulin --out html ```
 
-Caso não queira testar, o tarpaulin indica cobertura de 95.26% de todo o código, ou seja, 181/190 linhas.
+Caso não queira testar, o tarpaulin indica cobertura de 95.29% de todo o código, ou seja, 181/190 linhas.

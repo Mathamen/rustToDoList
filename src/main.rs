@@ -12,5 +12,5 @@ fn main() {
         writer: output,
     };
 
-    loop_principal(&mut io_control);
+    loop_principal(&mut io_control, "tarefas.json");
 }

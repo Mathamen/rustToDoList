@@ -37,18 +37,18 @@ impl ListaDeTarefas {
     pub fn new() -> ListaDeTarefas {
         ListaDeTarefas { tarefas: Vec::new() }
     }
-    pub fn adicionar_tarefa(&mut self, descricao: String) {
+    pub fn adicionar_tarefa(&mut self, descricao: String, nome_arquivo: &str) {
         let new_tarefa = Tarefa::new(descricao);
         self.tarefas.push(new_tarefa);
-        self.salvar_em_json("tarefas.json").unwrap_or_else(|err| {
+        self.salvar_em_json(nome_arquivo).unwrap_or_else(|err| {
            // eprintln!("Erro ao salvar as tarefas: {}", err);
         });
     }
-    pub fn iniciar_tarefa(&mut self, indice: usize) {
+    pub fn iniciar_tarefa(&mut self, indice: usize, nome_arquivo: &str) {
         if let Some(tarefa) = self.tarefas.get_mut(indice) {
             if tarefa.estado == Estado::NaoIniciada {
                 tarefa.estado = Estado::EmAndamento;
-            self.salvar_em_json("tarefas.json").unwrap_or_else(|err| {
+            self.salvar_em_json(nome_arquivo).unwrap_or_else(|err| {
                // eprintln!("Erro ao salvar as tarefas: {}", err);
             });
             } else{
@@ -58,24 +58,24 @@ impl ListaDeTarefas {
             println!("Índice inválido!");
         }
     }
-    pub fn completar_tarefa(&mut self, indice: usize) {
+    pub fn completar_tarefa(&mut self, indice: usize, nome_arquivo: &str) {
         if let Some(tarefa) = self.tarefas.get_mut(indice) {
             if tarefa.estado != Estado::Concluida{
             tarefa.estado = Estado::Concluida;
             }else{
                 println!("Esta tarefa já estava concluída, inválido!")
             }
-            self.salvar_em_json("tarefas.json").unwrap_or_else(|err| {
+            self.salvar_em_json(nome_arquivo).unwrap_or_else(|err| {
               //  eprintln!("Erro ao salvar as tarefas: {}", err);
             });
         } else {
             println!("Índice inválido!");
         }
     }
-    pub fn remover_tarefa(&mut self, indice: usize) {
+    pub fn remover_tarefa(&mut self, indice: usize, nome_arquivo: &str) {
         if indice < self.tarefas.len() {
             self.tarefas.remove(indice);
-            self.salvar_em_json("tarefas.json").unwrap_or_else(|err| {
+            self.salvar_em_json(nome_arquivo).unwrap_or_else(|err| {
                // eprintln!("Erro ao salvar as tarefas: {}", err);
             });
         } else {
@@ -83,10 +83,11 @@ impl ListaDeTarefas {
         }
     }
 
-    pub fn editar_tarefa(&mut self, indice: usize, descricao: String){
+    pub fn editar_tarefa(&mut self, indice: usize, descricao: String, nome_arquivo: &str){
         if let Some(tarefa) = self.tarefas.get_mut(indice) {
             tarefa.descricao = descricao;
         }
+        self.salvar_em_json(nome_arquivo).unwrap_or_else(|err|{});
     }
 
 
@@ -122,14 +123,14 @@ impl ListaDeTarefas {
     }
 
 
-    pub fn rollback_tarefa(&mut self, indice: usize){
+    pub fn rollback_tarefa(&mut self, indice: usize, nome_arquivo: &str){
         if let Some(tarefa) = self.tarefas.get_mut(indice) {
             if tarefa.estado != Estado::NaoIniciada{
                 tarefa.estado = Estado::NaoIniciada;
             }else{
                 println!("Esta tarefa já estava sem ser iniciada, inválido!")
             }
-            self.salvar_em_json("tarefas.json").unwrap_or_else(|err| {
+            self.salvar_em_json(nome_arquivo).unwrap_or_else(|err| {
               //  eprintln!("Erro ao salvar as tarefas: {}", err);
             });
         } else {

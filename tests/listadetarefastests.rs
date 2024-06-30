@@ -17,53 +17,53 @@ mod tests {
     #[test]
     fn test_adicionar_tarefa() {
         let mut lista = ListaDeTarefas::new();
-        lista.adicionar_tarefa(String::from("Teste"));
+        lista.adicionar_tarefa(String::from("Teste"),"test.json");
         assert_eq!(lista.tarefas.len(), 1);
     }
 
     #[test]
     fn test_iniciar_tarefa() {
         let mut lista = ListaDeTarefas::new();
-        lista.adicionar_tarefa(String::from("Teste"));
-        lista.iniciar_tarefa(0);
+        lista.adicionar_tarefa(String::from("Teste"),"test.json");
+        lista.iniciar_tarefa(0,"test.json");
         assert_eq!(lista.tarefas[0].estado, Estado::EmAndamento);
-        lista.iniciar_tarefa(0);
-        lista.iniciar_tarefa(20);
+        lista.iniciar_tarefa(0,"test.json");
+        lista.iniciar_tarefa(20,"test.json");
     }
 
     #[test]
     fn test_completar_tarefa() {
         let mut lista = ListaDeTarefas::new();
-        lista.adicionar_tarefa(String::from("Teste"));
+        lista.adicionar_tarefa(String::from("Teste"),"test.json");
         assert_eq!(lista.tarefas[0].estado, Estado::NaoIniciada);
-        lista.completar_tarefa(0);
+        lista.completar_tarefa(0,"test.json");
         assert_eq!(lista.tarefas[0].estado, Estado::Concluida);
-        lista.completar_tarefa(0);
+        lista.completar_tarefa(0,"test.json");
 
-        lista.adicionar_tarefa(String::from("Teste2"));
-        lista.iniciar_tarefa(1);
+        lista.adicionar_tarefa(String::from("Teste2"),"test.json");
+        lista.iniciar_tarefa(1,"test.json");
         assert_eq!(lista.tarefas[1].estado, Estado::EmAndamento);
-        lista.completar_tarefa(1);
+        lista.completar_tarefa(1,"test.json");
         assert_eq!(lista.tarefas[1].estado, Estado::Concluida);
 
-        lista.completar_tarefa(20);
+        lista.completar_tarefa(20,"test.json");
 
     }
 
     #[test]
     fn test_remover_tarefa() {
         let mut lista = ListaDeTarefas::new();
-        lista.remover_tarefa(0);
-        lista.adicionar_tarefa(String::from("Teste"));
-        lista.remover_tarefa(0);
+        lista.remover_tarefa(0,"test.json");
+        lista.adicionar_tarefa(String::from("Teste"),"test.json");
+        lista.remover_tarefa(0,"test.json");
         assert_eq!(lista.tarefas.len(), 0);
-        lista.remover_tarefa(20);
+        lista.remover_tarefa(20,"test.json");
     }
 
     #[test]
     fn test_carregar_salvar_json() {
         let mut lista = ListaDeTarefas::new();
-        lista.adicionar_tarefa(String::from("Teste"));
+        lista.adicionar_tarefa(String::from("Teste"),"test.json");
         lista.salvar_em_json("test.json").unwrap();
         let mut lista2 = ListaDeTarefas::new();
         lista2.carregar_de_json("test.json").unwrap();
@@ -74,11 +74,11 @@ mod tests {
     fn test_listar_tarefas() {
         let mut lista = ListaDeTarefas::new();
         lista.listar_tarefas(None, None);
-        lista.adicionar_tarefa(String::from("Tarefa 1"));
-        lista.adicionar_tarefa(String::from("Tarefa 2"));
-        lista.adicionar_tarefa(String::from("Tarefa 3"));
-        lista.iniciar_tarefa(0);
-        lista.completar_tarefa(1);
+        lista.adicionar_tarefa(String::from("Tarefa 1"),"test.json");
+        lista.adicionar_tarefa(String::from("Tarefa 2"),"test.json");
+        lista.adicionar_tarefa(String::from("Tarefa 3"),"test.json");
+        lista.iniciar_tarefa(0,"test.json");
+        lista.completar_tarefa(1,"test.json");
 
         // Testando listar as tarefas
         let output: Vec<String> = Vec::new();
@@ -133,8 +133,8 @@ mod tests {
     #[test]
     fn test_salvar_e_carregar_json() {
         let mut lista = ListaDeTarefas::new();
-        lista.adicionar_tarefa(String::from("Tarefa 1"));
-        lista.adicionar_tarefa(String::from("Tarefa 2"));
+        lista.adicionar_tarefa(String::from("Tarefa 1"),"test.json");
+        lista.adicionar_tarefa(String::from("Tarefa 2"),"test.json");
         let nome_arquivo = "test.json";
         assert!(lista.salvar_em_json(nome_arquivo).is_ok());
         let mut lista_carregada = ListaDeTarefas::new();
@@ -157,25 +157,25 @@ mod tests {
     #[test]
     fn test_rollback_tarefa() {
         let mut lista = ListaDeTarefas::new();
-        lista.adicionar_tarefa(String::from("Teste"));
-        lista.completar_tarefa(0);
-        lista.rollback_tarefa(0);
+        lista.adicionar_tarefa(String::from("Teste"),"test.json");
+        lista.completar_tarefa(0,"test.json");
+        lista.rollback_tarefa(0,"test.json");
         assert_eq!(lista.tarefas[0].estado, Estado::NaoIniciada);
 
-        lista.adicionar_tarefa(String::from("Teste2"));
-        lista.iniciar_tarefa(1);
-        lista.rollback_tarefa(1);
+        lista.adicionar_tarefa(String::from("Teste2"),"test.json");
+        lista.iniciar_tarefa(1,"test.json");
+        lista.rollback_tarefa(1,"test.json");
         assert_eq!(lista.tarefas[0].estado, Estado::NaoIniciada);
 
-        lista.rollback_tarefa(0);
-        lista.rollback_tarefa(5);
+        lista.rollback_tarefa(0,"test.json");
+        lista.rollback_tarefa(5,"test.json");
     }
 
     #[test]
     fn test_editar_descricao(){
         let mut lista = ListaDeTarefas::new();
-        lista.adicionar_tarefa(String::from("Teste"));
-        lista.editar_tarefa(0, String::from("hello"));
+        lista.adicionar_tarefa(String::from("Teste"),"test.json");
+        lista.editar_tarefa(0, String::from("hello"),"test.json");
         assert_eq!(lista.tarefas[0].descricao, String::from("hello"))
     }
     #[test]
@@ -316,7 +316,7 @@ mod tests {
         let output = Cursor::new(Vec::new());
         let mut io_control = IOMock { reader: input, writer: output };
 
-        loop_principal(&mut io_control);
+        loop_principal(&mut io_control,"test.json");
 
         let output_str = String::from_utf8(io_control.writer.into_inner()).unwrap();
     }
